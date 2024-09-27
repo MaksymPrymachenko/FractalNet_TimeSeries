@@ -1,0 +1,18 @@
+model:
+  class_path: src.models.nets.LSTM_Net
+  init_args:
+    input_size: 1
+    hidden_size: 100
+    num_layers: 1
+    bidirectional: False
+    lr: 1e-3
+data:
+  input_path: data/processed/spot.csv
+  input_column: Close_MinMaxScaler
+  window_size: 30
+  batch_size: 256
+trainer:
+  logger:
+    init_args:
+      experiment_name: StockCloseMinMaxScaler
+      run_name: LSTM

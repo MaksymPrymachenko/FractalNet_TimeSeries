@@ -1,0 +1,26 @@
+model:
+  class: LSTM_Net
+  constant_parameters:
+    bidirectional: False
+trainer:
+  max_epochs: 400
+  early_stopping_patience: 50
+hyperparameters:
+  hidden_size:
+    type: int
+    range:
+      low: 16
+      high: 128
+  num_layers:
+    type: int
+    range:
+      low: 1
+      high: 3
+  lr:
+    type: loguniform
+    range:
+      low: 0.00001
+      high: 0.01
+optuna:
+  n_trials: 20
+  timeout: 1800

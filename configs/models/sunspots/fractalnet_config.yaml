@@ -1,0 +1,32 @@
+model:
+  class_path: src.models.nets.FractalNet
+  init_args:
+    data_shape:
+      - 1
+      - 132
+      - 1
+    n_columns: 4
+    init_channels: 64
+    p_ldrop: 0.
+    dropout_probs:
+      - 0.1
+      - 0.1
+      - 0.1
+    gdrop_ratio: 0.
+    gap: 1
+    init: xavier
+    pad_type: zero
+    doubling: True
+    consist_gdrop: False
+    dropout_pos: CDBR
+    lr: 0.001
+data:
+  input_path: data/processed/Sunspots.csv
+  input_column: Monthly Mean Total Sunspot Number
+  window_size: 132
+  batch_size: 512
+trainer:
+  logger:
+    init_args:
+      experiment_name: Sunspots
+      run_name: FractalNet

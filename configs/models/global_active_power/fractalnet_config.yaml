@@ -1,0 +1,32 @@
+model:
+  class_path: src.models.nets.FractalNet
+  init_args:
+    data_shape:
+      - 1
+      - 100
+      - 1
+    n_columns: 4
+    init_channels: 128
+    p_ldrop: 0.15
+    dropout_probs:
+      - 0.1
+      - 0.1
+      - 0.1
+    gdrop_ratio: 0.
+    gap: 0
+    init: xavier
+    pad_type: zero
+    doubling: False
+    consist_gdrop: False
+    dropout_pos: CDBR
+    lr: 1e-2
+data:
+  input_path: data/processed/global_active_power.csv
+  input_column: Global_active_power_MinMaxScaler
+  window_size: 100
+  batch_size: 512
+trainer:
+  logger:
+    init_args:
+      experiment_name: Global_active_power_MinMaxScaler
+      run_name: FractalNet

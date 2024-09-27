@@ -1,0 +1,7 @@
+/db.sqlite3
+/data
+*/lightning_logs
+/lightning_logs
+/mlruns
+*/__pychache__
+*.pyc

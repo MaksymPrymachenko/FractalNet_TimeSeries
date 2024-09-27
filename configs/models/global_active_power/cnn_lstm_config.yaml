@@ -1,0 +1,19 @@
+model:
+  class_path: src.models.nets.CNN_LSTM_Net
+  init_args:
+    input_size: 1
+    cnn_out_channels: 64
+    kernel_size: 16
+    lstm_hidden_size: 100
+    lstm_num_layers: 1
+    fc_output_size: 1
+    lr: 1e-3
+data:
+  input_path: data/processed/global_active_power.csv
+  input_column: Global_active_power_MinMaxScaler
+  window_size: 100
+trainer:
+  logger:
+    init_args:
+      experiment_name: Global_active_power_MinMaxScaler
+      run_name: CNN-LSTM

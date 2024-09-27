@@ -1,0 +1,20 @@
+model:
+  class_path: src.models.nets.CNN_LSTM_Net
+  init_args:
+    input_size: 1
+    cnn_out_channels: 64
+    kernel_size: 16
+    lstm_hidden_size: 100
+    lstm_num_layers: 1
+    fc_output_size: 1
+    lr: 1e-3
+data:
+  input_path: data/processed/spot.csv
+  input_column: Close_MinMaxScaler
+  window_size: 30
+  batch_size: 256
+trainer:
+  logger:
+    init_args:
+      experiment_name: StockCloseMinMaxScaler
+      run_name: CNN-LSTM

@@ -1,0 +1,32 @@
+model:
+  class_path: src.models.nets.FractalNet
+  init_args:
+    data_shape:
+      - 1
+      - 30
+      - 1
+    n_columns: 5
+    init_channels: 512
+    p_ldrop: 0.15
+    dropout_probs:
+      - 0.2
+      - 0.3
+      - 0.4
+    gdrop_ratio: 0.
+    gap: 0
+    init: xavier
+    pad_type: zero
+    doubling: False
+    consist_gdrop: False
+    dropout_pos: CDBR
+    lr: 1e-2
+data:
+  input_path: data/processed/spot.csv
+  input_column: Close_MinMaxScaler
+  window_size: 30
+  batch_size: 256
+trainer:
+  logger:
+    init_args:
+      experiment_name: StockCloseMinMaxScaler
+      run_name: FractalNet
