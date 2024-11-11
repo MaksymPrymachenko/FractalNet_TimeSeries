@@ -14,7 +14,7 @@ from typing import Dict, Any
 
 from src.models.nets import LSTM_Net, LSTM_GRU_Net, CNN_LSTM_Net, FractalNet
 
-from src.utils import TimeSeriesDataModule
+from utils.normalizer import TimeSeriesDataModule
 
 MODEL_CLASSES = {
     "LSTM_Net": LSTM_Net,

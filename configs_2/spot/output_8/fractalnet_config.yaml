@@ -1,0 +1,34 @@
+fit:
+  model:
+    class_path: src.models.nets.FractalNet
+    init_args:
+      input_size: 64
+      output_size: 8
+      n_columns: 1
+      init_channels: 64
+      lstm_num_layers: 1
+      lstm_hidden_size: 128
+      p_ldrop: 0.15
+      dropout_probs:
+        - 0.
+      gdrop_ratio: 0.
+      gap: 0
+      init: xavier
+      pad_type: zero
+      doubling: False
+      consist_gdrop: False
+      dropout_pos: CDBR
+      lr: 1e-3
+      normalizer:
+        class_path: src.utils.normalizer.MaxMinNormalizer
+  data:
+    input_path: data/processed/spot.csv
+    input_column: Close
+    window_size: 30
+    batch_size: 64
+    predict_size: 8
+  trainer:
+    logger:
+      init_args:
+        experiment_name: Close
+        run_name: FractalNet

@@ -13,6 +13,7 @@ class LSTM_Net(BaseModelPL):
         hidden_size: int,
         num_layers: int,
         input_size: int = 1,
+        output_size: int = 1,
         bidirectional: bool = False,
         **kwargs
     ) -> None:
@@ -30,7 +31,7 @@ class LSTM_Net(BaseModelPL):
 
         self.fc = nn.Sequential(
             nn.Dropout(0.1),
-            nn.Linear(hidden_size * 2 if bidirectional else hidden_size, 1),
+            nn.Linear(hidden_size * 2 if bidirectional else hidden_size, output_size),
         )
 
     def forward(self, x):
@@ -45,7 +46,12 @@ class LSTM_Net(BaseModelPL):
 class LSTM_GRU_Net(BaseModelPL):
 
     def __init__(
-        self, input_size: int, hidden_size: int, num_layers: int, **kwargs
+        self,
+        input_size: int,
+        output_size: int = 1,
+        hidden_size: int = 128,
+        num_layers: int = 2,
+        **kwargs
     ) -> None:
         super(LSTM_GRU_Net, self).__init__(**kwargs)
 
@@ -58,7 +64,7 @@ class LSTM_GRU_Net(BaseModelPL):
         self.gru_dropout = nn.Dropout(0.1)
 
         self.fc = nn.Sequential(
-            nn.Linear(hidden_size, 1),
+            nn.Linear(hidden_size, output_size),
         )
 
     def forward(self, x):
@@ -79,12 +85,12 @@ class CNN_LSTM_Net(BaseModelPL):
 
     def __init__(
         self,
-        input_size: int,
-        cnn_out_channels: int,
-        kernel_size: int,
-        lstm_hidden_size: int,
-        lstm_num_layers: int,
-        fc_output_size: int,
+        input_size: int = 1,
+        output_size: int = 1,
+        cnn_out_channels: int = 64,
+        kernel_size: int = 4,
+        lstm_hidden_size: int = 128,
+        lstm_num_layers: int = 2,
         dropout: float = 0.5,
         **kwargs
     ):
@@ -94,9 +100,11 @@ class CNN_LSTM_Net(BaseModelPL):
             in_channels=input_size,
             out_channels=cnn_out_channels,
             kernel_size=kernel_size,
+            padding=(kernel_size - 1) // 2,
         )
+        self.batch_norm = nn.BatchNorm1d(cnn_out_channels)
         self.relu = nn.ReLU()
-        self.maxpool = nn.MaxPool1d(kernel_size=2)
+        self.maxpool = nn.MaxPool1d(kernel_size=1)
         self.dropout = nn.Dropout(dropout)
 
         self.lstm = nn.LSTM(
@@ -106,12 +114,13 @@ class CNN_LSTM_Net(BaseModelPL):
             batch_first=True,
         )
 
-        self.fc = nn.Linear(lstm_hidden_size, fc_output_size)
+        self.fc = nn.Linear(lstm_hidden_size, output_size)
 
     def forward(self, x):
         x = x.unsqueeze(-1).permute(0, 2, 1)
 
         x = self.conv1(x)
+        x = self.batch_norm(x)
         x = self.relu(x)
         x = self.maxpool(x)
         x = self.dropout(x)
@@ -129,18 +138,21 @@ class FractalNet(BaseModelPL):
 
     def __init__(
         self,
-        data_shape,
         n_columns,
         init_channels,
         p_ldrop,
         dropout_probs,
         gdrop_ratio,
+        input_size: int = 1,
+        output_size: int = 1,
         gap=0,
         init="xavier",
         pad_type="zero",
         doubling=False,
         consist_gdrop=True,
         dropout_pos="CDBR",
+        lstm_num_layers: int = 2,
+        lstm_hidden_size: int = 256,
         **kwargs
     ):
         super(FractalNet, self).__init__(**kwargs)
@@ -152,9 +164,7 @@ class FractalNet(BaseModelPL):
         self.consist_gdrop = consist_gdrop
         self.gdrop_ratio = gdrop_ratio
         self.n_columns = n_columns
-        C_in, L, n_classes = data_shape
-
-        size = L
+        C_in = 1
 
         layers = nn.ModuleList()
         C_out = init_channels
@@ -177,26 +187,32 @@ class FractalNet(BaseModelPL):
             elif gap == 1:
                 layers.append(nn.AdaptiveAvgPool1d(1))
 
-            size = size // 2
+            input_size = input_size // 2
             total_layers += fb.max_depth
             C_in = C_out
             if b < self.B - 2:
                 C_out *= 2
 
-        print("Last featuremap size = {}".format(size))
+        print("Last featuremap size = {}".format(input_size))
         print("Total layers = {}".format(total_layers))
 
         if gap == 2:
-            layers.append(nn.Conv1d(C_out, n_classes, 1, padding=0))
+            layers.append(nn.Conv1d(C_out, output_size, 1, padding=0))
             layers.append(nn.AdaptiveAvgPool1d(1))
             layers.append(Flatten())
         else:
             # layers.append(Flatten())
             # layers.append(nn.Linear(C_out * size, n_classes))
             self.lstm = nn.LSTM(
-                C_out, 512, num_layers=2, batch_first=True, bidirectional=False  # 512
+                C_out,
+                lstm_hidden_size,
+                num_layers=lstm_num_layers,
+                batch_first=True,
+                bidirectional=False,  # 512
             )
-            self.fc = nn.Sequential(nn.Dropout(0.1), nn.Linear(512, 1))  # (512, 1)
+            self.fc = nn.Sequential(
+                nn.Dropout(p_ldrop), nn.Linear(lstm_hidden_size, output_size)
+            )  # (512, 1)
 
         self.layers = layers
 

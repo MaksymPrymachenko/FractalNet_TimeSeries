@@ -1,0 +1,24 @@
+fit:
+  model:
+    class_path: src.models.nets.LSTM_Net
+    init_args:
+      input_size: 1
+      hidden_size: 64
+      num_layers: 1
+      bidirectional: False
+      lr: 1e-3
+      output_size: 1
+      normalizer:
+        class_path: src.utils.normalizer.MaxMinNormalizer
+  data:
+    input_path: data/processed/spot.csv
+    input_column: Close
+    window_size: 7
+    predict_size: 32
+    batch_size: 64
+    predict_size: 1
+  trainer:
+    logger:
+      init_args:
+        experiment_name: Close
+        run_name: LSTM
